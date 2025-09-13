@@ -4,11 +4,12 @@
 
 int Atoi_K (const char* const Str);
 void Puts_K (const char* const Str);
+char* Strdup_K (const char* const Str);
 size_t Strlen_K (const char* const Str);
 const char* Strchr_K (const char* const Str, const char Symbol);
 char* Strcpy_K (char* const Changeable_Str, const char* const Str);
 char* Strcat_K (char* const Changeable_Str, const char* const Str);
-char* Fgets_K (char* const Changeable_Str, const int Quantity, FILE* Str);
+char* Fgets_K (char* const Changeable_Str, const int Quantity, FILE* const Str);
 char* Strncpy_K (char* const Changeable_Str, const char* const Str, const int Quantity);
 char* Strncat_K (char* const Changeable_Str, const char* const Str, const int Quantity);
 
@@ -18,10 +19,11 @@ int main ()
     char Empty_Str_1[20] = "123456789";
     char Empty_Str_2[10] = "123456789";
     char* Empty_Str_3 = (char*) calloc (100, sizeof(char));
-    Empty_Str_3[0] = '5';
+    Empty_Str_3[0] = '5'; // просто для примера
     char* Empty_Str_4 = (char*) calloc (100, sizeof(char));
     char Empty_Str_5[100] = "01234";
     char Str_Numeric[10] = "-123weg";
+    char Original_Str[40] = "abs rty 123";
 
     Puts_K (Str);
 
@@ -37,20 +39,27 @@ int main ()
 
     printf ("%s\n", Strncat_K (Empty_Str_4, Str, 2));
 
-    FILE* fl = fopen ("Fgets_K.txt", "r");
+    FILE* fl = fopen ("Fgets_K_Test.txt", "r");
     printf ("%s\n", Fgets_K (Empty_Str_5, 5, fl));
     fclose (fl);
 
     printf ("%d\n", Atoi_K (Str_Numeric));
 
-
+    char* Copied_Str = Strdup_K (Original_Str);
+    printf ("%s\n", Copied_Str);
 
     free (Empty_Str_3);
     free (Empty_Str_4);
+    free (Copied_Str);
     return 0;
 }
 
+char* Strdup_K (const char* const Str)
+{
+    assert (Str != NULL);
 
+    return Strcpy_K ((char*) malloc (Strlen_K (Str)), Str);
+}
 
 int Atoi_K (const char* const Str)
 {
