@@ -49,10 +49,9 @@ int main ()
     char* Copied_Str = Strdup_K (Original_Str);
     printf ("%s\n", Copied_Str);
 
-    size_t a = 10;
+    size_t a = 100;
     FILE* Getline_K_Test = fopen ("Getline_K_Test.txt", "r");
-    char* Str_For_Getline = (char*) calloc (100, sizeof (char));
-    printf ("%zu", sizeof(*Str_For_Getline)); // wtf
+    char* Str_For_Getline = (char*) calloc (a, sizeof (char));
     ssize_t k = Getline_K (&Str_For_Getline, &a, Getline_K_Test);
     printf ("%s\n", Str_For_Getline);
     fclose (Getline_K_Test);
