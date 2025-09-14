@@ -9,18 +9,19 @@ size_t Strlen_K (const char* const Str);
 const char* Strchr_K (const char* const Str, const char Symbol);
 char* Strcpy_K (char* const Changeable_Str, const char* const Str);
 char* Strcat_K (char* const Changeable_Str, const char* const Str);
-char* Fgets_K (char* const Changeable_Str, const int Quantity, FILE* const Str);
-char* Strncpy_K (char* const Changeable_Str, const char* const Str, const int Quantity);
-char* Strncat_K (char* const Changeable_Str, const char* const Str, const int Quantity);
+ssize_t Getline_K (char** Buffer_Str, size_t* Len_Buffer, FILE* const Str);
+char* Fgets_K (char* const Changeable_Str, const size_t Max_Quantity, FILE* const Str);
+char* Strncpy_K (char* const Changeable_Str, const char* const Str, const size_t Max_Quantity);
+char* Strncat_K (char* const Changeable_Str, const char* const Str, const size_t Max_Quantity);
 
 int main ()
 {
     char Str[7] = "sqvRT";
     char Empty_Str_1[20] = "123456789";
     char Empty_Str_2[10] = "123456789";
-    char* Empty_Str_3 = (char*) calloc (100, sizeof(char));
+    char* Empty_Str_3 = (char*) calloc (100, sizeof (char));
     Empty_Str_3[0] = '5'; // просто для примера
-    char* Empty_Str_4 = (char*) calloc (100, sizeof(char));
+    char* Empty_Str_4 = (char*) calloc (100, sizeof (char));
     char Empty_Str_5[100] = "01234";
     char Str_Numeric[10] = "-123weg";
     char Original_Str[40] = "abs rty 123";
@@ -39,19 +40,76 @@ int main ()
 
     printf ("%s\n", Strncat_K (Empty_Str_4, Str, 2));
 
-    FILE* fl = fopen ("Fgets_K_Test.txt", "r");
-    printf ("%s\n", Fgets_K (Empty_Str_5, 5, fl));
-    fclose (fl);
+    FILE* Fgets_K_Test = fopen ("Fgets_K_Test.txt", "r");
+    printf ("%s\n", Fgets_K (Empty_Str_5, 5, Fgets_K_Test));
+    fclose (Fgets_K_Test);
 
     printf ("%d\n", Atoi_K (Str_Numeric));
 
     char* Copied_Str = Strdup_K (Original_Str);
     printf ("%s\n", Copied_Str);
 
+    size_t a = 10;
+    FILE* Getline_K_Test = fopen ("Getline_K_Test.txt", "r");
+    char* Str_For_Getline = (char*) calloc (100, sizeof (char));
+    printf ("%zu", sizeof(*Str_For_Getline)); // wtf
+    ssize_t k = Getline_K (&Str_For_Getline, &a, Getline_K_Test);
+    printf ("%s\n", Str_For_Getline);
+    fclose (Getline_K_Test);
+
     free (Empty_Str_3);
     free (Empty_Str_4);
     free (Copied_Str);
+    free (Str_For_Getline);
     return 0;
+}
+
+ssize_t Getline_K (char** Buffer_Str, size_t* Len_Buffer, FILE* const Str)
+{
+    assert (Str != NULL);
+
+    if (*Buffer_Str == NULL)
+    {
+        *Buffer_Str = (char*) calloc (100, sizeof (char));
+        *Len_Buffer = 100;
+    }
+
+    size_t i = 0;
+
+    while (1)
+    {
+        char Symbol = fgetc(Str);
+
+        if (Symbol == '\n')
+        {
+            (*Buffer_Str)[i] = Symbol;
+            (*Buffer_Str)[i+1] = '\0';
+            return i;
+        }
+
+        if (Symbol == EOF)
+        {
+            if (i != 0)
+            {
+                return i;
+            }
+
+            else
+            {
+                return NULL;
+            }
+        }
+
+        (*Buffer_Str)[i] = Symbol;
+
+        i++;
+
+        if (i == (*Len_Buffer) - 1)
+        {
+            *Buffer_Str = (char*) realloc (*Buffer_Str, (*Len_Buffer) * 2);
+            *Len_Buffer = (*Len_Buffer) * 2;
+        }
+    }
 }
 
 char* Strdup_K (const char* const Str)
@@ -105,19 +163,19 @@ int Atoi_K (const char* const Str)
     return Sum*Sign;
 }
 
-char* Fgets_K (char* const Changeable_Str, const int Quantity, FILE* const Str)
+char* Fgets_K (char* const Changeable_Str, const size_t Max_Quantity, FILE* const Str)
 {
     assert (Changeable_Str != NULL);
     assert (Str != NULL);
 
-    int i = 0;
+    size_t i = 0;
 
-    if (Quantity < 1)
+    if (Max_Quantity < 1)
     {
         return NULL;
     }
 
-    while (i < Quantity - 1)
+    while (i < Max_Quantity - 1)
     {
         char Symbol = fgetc(Str);
 
@@ -149,10 +207,9 @@ char* Fgets_K (char* const Changeable_Str, const int Quantity, FILE* const Str)
     Changeable_Str[i] = '\0';
 
     return Changeable_Str;
-
 }
 
-char* Strncat_K (char* const Changeable_Str, const char* const Str, const int Quantity)
+char* Strncat_K (char* const Changeable_Str, const char* const Str, const size_t Max_Quantity)
 {
     assert (Changeable_Str != NULL);
     assert (Str != NULL);
@@ -161,9 +218,9 @@ char* Strncat_K (char* const Changeable_Str, const char* const Str, const int Qu
     const size_t Len_Str = Strlen_K (Str);
     size_t a = 0;
 
-    if (Quantity <= Len_Str)
+    if (Max_Quantity <= Len_Str)
     {
-        a = Quantity;
+        a = Max_Quantity;
     }
 
     else
@@ -197,7 +254,7 @@ char* Strcat_K (char* const Changeable_Str, const char* const Str)
     return Changeable_Str;
 }
 
-char* Strncpy_K (char* const Changeable_Str, const char* const Str, const int Quantity)
+char* Strncpy_K (char* const Changeable_Str, const char* const Str, const size_t Max_Quantity)
 {
     assert (Changeable_Str != NULL);
     assert (Str != NULL);
@@ -206,14 +263,14 @@ char* Strncpy_K (char* const Changeable_Str, const char* const Str, const int Qu
     const size_t Len_Changeable_Str = Strlen_K (Changeable_Str);
     size_t a = 0;
 
-    if (Quantity >= Len_Changeable_Str)
+    if (Max_Quantity >= Len_Changeable_Str)
     {
         a = Len_Changeable_Str;
     }
 
-    else if (Quantity <= Len_Str)
+    else if (Max_Quantity <= Len_Str)
     {
-        a = Quantity;
+        a = Max_Quantity;
     }
 
     else
