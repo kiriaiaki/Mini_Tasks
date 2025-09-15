@@ -3,7 +3,7 @@
 #include <math.h>
 
 int Atoi_K (const char* const Str);
-void Puts_K (const char* const Str);
+int Puts_K (const char* const Str);
 char* Strdup_K (const char* const Str);
 size_t Strlen_K (const char* const Str);
 const char* Strchr_K (const char* const Str, const char Symbol);
@@ -23,7 +23,7 @@ int main ()
     Empty_Str_3[0] = '5'; // просто для примера
     char* Empty_Str_4 = (char*) calloc (100, sizeof (char));
     char Empty_Str_5[100] = "01234";
-    char Str_Numeric[10] = "-123weg";
+    char Str_Numeric[100] = "-123987654567890564567weg";
     char Original_Str[40] = "abs rty 123";
 
     Puts_K (Str);
@@ -49,10 +49,10 @@ int main ()
     char* Copied_Str = Strdup_K (Original_Str);
     printf ("%s\n", Copied_Str);
 
-    size_t a = 100;
+    size_t Len_Buffer = 10;
     FILE* Getline_K_Test = fopen ("Getline_K_Test.txt", "r");
-    char* Str_For_Getline = (char*) calloc (a, sizeof (char));
-    ssize_t k = Getline_K (&Str_For_Getline, &a, Getline_K_Test);
+    char* Str_For_Getline = (char*) calloc (Len_Buffer, sizeof (char));
+    ssize_t k = Getline_K (&Str_For_Getline, &Len_Buffer, Getline_K_Test);
     printf ("%s\n", Str_For_Getline);
     fclose (Getline_K_Test);
 
@@ -63,9 +63,13 @@ int main ()
     return 0;
 }
 
-ssize_t Getline_K (char** Buffer_Str, size_t* Len_Buffer, FILE* const Str)
+ssize_t Getline_K (char** const Buffer_Str, size_t* const Len_Buffer, FILE* const Str)
 {
     assert (Str != NULL);
+    // assert (Buffer_Str != NULL);
+    // assert (Len_Buffer != NULL);
+
+    const size_t New_Len_Empty_Buffer = 100;
 
     if (*Buffer_Str == NULL)
     {
@@ -95,7 +99,7 @@ ssize_t Getline_K (char** Buffer_Str, size_t* Len_Buffer, FILE* const Str)
 
             else
             {
-                return NULL;
+                return -1;
             }
         }
 
@@ -124,7 +128,7 @@ int Atoi_K (const char* const Str)
 
     size_t Len_Str = Strlen_K (Str);
 
-    int M_Only_Numeric[50];
+    int M_Only_Numeric[12];
     int i = 0;
     int Sign = 1;
     int Degree = 0;
@@ -152,6 +156,10 @@ int Atoi_K (const char* const Str)
 
         Degree ++;
         i++;
+        if (Degree == 11)
+        {
+            return 0;
+        }
     }
 
     for (int j = 0; j < Degree; j++)
@@ -214,18 +222,7 @@ char* Strncat_K (char* const Changeable_Str, const char* const Str, const size_t
     assert (Str != NULL);
 
     const size_t Len_Changeable_Str = Strlen_K (Changeable_Str);
-    const size_t Len_Str = Strlen_K (Str);
-    size_t a = 0;
-
-    if (Max_Quantity <= Len_Str)
-    {
-        a = Max_Quantity;
-    }
-
-    else
-    {
-        a = Len_Str;
-    }
+    const size_t a = fmin (Max_Quantity, Strlen_K (Str));
 
     for (size_t i = 0; i < a; i++)
     {
@@ -258,28 +255,20 @@ char* Strncpy_K (char* const Changeable_Str, const char* const Str, const size_t
     assert (Changeable_Str != NULL);
     assert (Str != NULL);
 
-    const size_t Len_Str = Strlen_K (Str);
-    const size_t Len_Changeable_Str = Strlen_K (Changeable_Str);
-    size_t a = 0;
-
-    if (Max_Quantity >= Len_Changeable_Str)
-    {
-        a = Len_Changeable_Str;
-    }
-
-    else if (Max_Quantity <= Len_Str)
-    {
-        a = Max_Quantity;
-    }
-
-    else
-    {
-        a = Len_Str + 1;
-    }
+    const size_t Len_Str = (Strlen_K (Str));
+    const size_t a = fmin (Max_Quantity, Len_Str);
 
     for (size_t i = 0; i < a; i++)
     {
         Changeable_Str[i] = Str[i];
+    }
+
+    if (Len_Str < Max_Quantity)
+    {
+        for (size_t i = 0; i < Max_Quantity - Len_Str; i++)
+        {
+            Changeable_Str[i] = '\0';
+        }
     }
 
     return Changeable_Str;
@@ -331,16 +320,22 @@ const char* Strchr_K (const char* const Str, const char Symbol)
     return NULL;
 }
 
-void Puts_K (const char* const Str)
+int Puts_K (const char* const Str)
 {
     assert (Str != NULL);
 
-    const size_t Len_Str (Strlen_K (Str));
+    const size_t Len_Str = (Strlen_K (Str));
 
     for (size_t i = 0; i < Len_Str; i++)
     {
-        putchar (Str[i]);
+        int Symbol = putchar (Str[i]);
+        if (Symbol == EOF)
+        {
+            return EOF;
+        }
     }
 
     putchar('\n');
+
+    return 1;
 }
