@@ -7,6 +7,7 @@ int Puts_K (const char* const Str);
 char* Strdup_K (const char* const Str);
 size_t Strlen_K (const char* const Str);
 const char* Strchr_K (const char* const Str, const char Symbol);
+int Strcmp_K (const char* const Str_1, const char* const Str_2);
 char* Strcpy_K (char* const Changeable_Str, const char* const Str);
 char* Strcat_K (char* const Changeable_Str, const char* const Str);
 ssize_t Getline_K (char** Buffer_Str, size_t* Len_Buffer, FILE* const Str);
@@ -23,38 +24,44 @@ int main ()
     Empty_Str_3[0] = '5'; // просто для примера
     char* Empty_Str_4 = (char*) calloc (100, sizeof (char));
     char Empty_Str_5[100] = "01234";
-    char Str_Numeric[100] = "-123987654567890564567weg";
+    char Str_Numeric[100] = "947823975797418014748364abs";
     char Original_Str[40] = "abs rty 123";
 
     Puts_K (Str);
 
-    printf ("%p\n", Strchr_K (Str, 'v'));
+    printf ("strchr: %p\n", Strchr_K (Str, 'v'));
 
-    printf ("%zu\n", Strlen_K (Str));
+    printf ("strlen: %zu\n", Strlen_K (Str));
 
-    printf ("%s\n", Strcpy_K (Empty_Str_1, Str));
+    printf ("strcpy: %s\n", Strcpy_K (Empty_Str_1, Str));
 
-    printf ("%s\n", Strncpy_K (Empty_Str_2, Str, 5));
+    printf ("strncpy: %s\n", Strncpy_K (Empty_Str_2, Str, 5));
 
-    printf ("%s\n",Strcat_K (Empty_Str_3, Str));
+    printf ("strcat: %s\n",Strcat_K (Empty_Str_3, Str));
 
-    printf ("%s\n", Strncat_K (Empty_Str_4, Str, 2));
+    printf ("strncat: %s\n", Strncat_K (Empty_Str_4, Str, 2));
 
     FILE* Fgets_K_Test = fopen ("Fgets_K_Test.txt", "r");
-    printf ("%s\n", Fgets_K (Empty_Str_5, 5, Fgets_K_Test));
+    printf ("fgets: %s\n", Fgets_K (Empty_Str_5, 5, Fgets_K_Test));
     fclose (Fgets_K_Test);
 
-    printf ("%d\n", Atoi_K (Str_Numeric));
+    printf ("atoi: %d\n", Atoi_K (Str_Numeric));
 
     char* Copied_Str = Strdup_K (Original_Str);
-    printf ("%s\n", Copied_Str);
+    printf ("strdup: %s\n", Copied_Str);
 
     size_t Len_Buffer = 10;
     FILE* Getline_K_Test = fopen ("Getline_K_Test.txt", "r");
     char* Str_For_Getline = (char*) calloc (Len_Buffer, sizeof (char));
     ssize_t k = Getline_K (&Str_For_Getline, &Len_Buffer, Getline_K_Test);
-    printf ("%s\n", Str_For_Getline);
+    printf ("getline: %s\n", Str_For_Getline);
     fclose (Getline_K_Test);
+
+    char a[20] = "214748364abs";
+    int kak = atoi(a); // wtf? it isn't as in documentations ;(
+    printf ("real atoi: %d\n", kak);
+
+    printf ("strcmp: %d\n", Strcmp_K ("abs11", "abs111"));
 
     free (Empty_Str_3);
     free (Empty_Str_4);
@@ -63,18 +70,35 @@ int main ()
     return 0;
 }
 
+int Strcmp_K (const char* const Str_1, const char* const Str_2)
+{
+    const size_t Len_Str_1 = Strlen_K (Str_1);
+
+    for (size_t i = 0; i < Len_Str_1 + 1; i++)
+    {
+        int Difference = (Str_1[i] - Str_2[i]);
+
+        if (Difference != 0)
+        {
+            return Difference;
+        }
+    }
+
+    return 0;
+}
+
 ssize_t Getline_K (char** const Buffer_Str, size_t* const Len_Buffer, FILE* const Str)
 {
     assert (Str != NULL);
-    // assert (Buffer_Str != NULL);
-    // assert (Len_Buffer != NULL);
+    assert (Buffer_Str != NULL);
+    assert (Len_Buffer != NULL);
 
-    const size_t New_Len_Empty_Buffer = 100;
+    const size_t Len_New_Empty_Buffer = 100;
 
     if (*Buffer_Str == NULL)
     {
-        *Buffer_Str = (char*) calloc (100, sizeof (char));
-        *Len_Buffer = 100;
+        *Buffer_Str = (char*) calloc (Len_New_Empty_Buffer, sizeof (char));
+        *Len_Buffer = Len_New_Empty_Buffer;
     }
 
     size_t i = 0;
@@ -127,12 +151,10 @@ int Atoi_K (const char* const Str)
     assert (Str != NULL);
 
     size_t Len_Str = Strlen_K (Str);
-
-    int M_Only_Numeric[12];
     int i = 0;
     int Sign = 1;
-    int Degree = 0;
     int Sum = 0;
+    int Extreme_Int = 2147483647;
 
     while (Str[i] == ' ')
     {
@@ -152,19 +174,33 @@ int Atoi_K (const char* const Str)
 
     while (Str[i] >= '0' && Str[i] <= '9')
     {
-        M_Only_Numeric[Degree] = int (Str[i]) - 48;
-
-        Degree ++;
-        i++;
-        if (Degree == 11)
+        printf ("Number %d\n", Str[i]- 48);
+        printf ("Sum was %d\n", Sum);
+        if (((Sum * 10) + int ((Str[i]) - 48)) < Extreme_Int)
         {
-            return 0;
+            Sum = (Sum * 10) + int ((Str[i]) - 48);
         }
-    }
 
-    for (int j = 0; j < Degree; j++)
-    {
-        Sum += M_Only_Numeric[j] * pow (10, (Degree - j - 1));
+        else
+        {
+            return Extreme_Int*Sign ;
+
+        }
+
+        printf ("Sum now %d\n", Sum);
+//         if (Sum >= 214748364)
+//         {
+//             if (Sum < 214748365 && 0 <= ((Str[i+1]) - 48) && ((Str[i+1]) - 48) < 7)
+//             {
+//                 continue;
+//             }
+//
+//             else
+//             {
+//                 return Extreme_Int*Sign ;
+//             }
+//         }
+        i++;
     }
 
     return Sum*Sign;
@@ -329,6 +365,7 @@ int Puts_K (const char* const Str)
     for (size_t i = 0; i < Len_Str; i++)
     {
         int Symbol = putchar (Str[i]);
+
         if (Symbol == EOF)
         {
             return EOF;
