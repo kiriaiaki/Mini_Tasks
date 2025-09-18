@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <assert.h>
-#include <math.h>
 
 int Atoi_K (const char* const Str);
 int Puts_K (const char* const Str);
 char* Strdup_K (const char* const Str);
 size_t Strlen_K (const char* const Str);
+size_t Min_size_t (const size_t First, const size_t Second);
 const char* Strchr_K (const char* const Str, const char Symbol);
 int Strcmp_K (const char* const Str_1, const char* const Str_2);
 char* Strcpy_K (char* const Changeable_Str, const char* const Str);
@@ -24,7 +24,7 @@ int main ()
     Empty_Str_3[0] = '5'; // просто для примера
     char* Empty_Str_4 = (char*) calloc (100, sizeof (char));
     char Empty_Str_5[100] = "01234";
-    char Str_Numeric[100] = "947823975797418014748364abs";
+    char Str_Numeric[100] = "291474836411abs";
     char Original_Str[40] = "abs rty 123";
 
     Puts_K (Str);
@@ -57,10 +57,6 @@ int main ()
     printf ("getline: %s\n", Str_For_Getline);
     fclose (Getline_K_Test);
 
-    char a[20] = "214748364abs";
-    int kak = atoi(a); // wtf? it isn't as in documentations ;(
-    printf ("real atoi: %d\n", kak);
-
     printf ("strcmp: %d\n", Strcmp_K ("abs11", "abs111"));
 
     free (Empty_Str_3);
@@ -70,8 +66,24 @@ int main ()
     return 0;
 }
 
+size_t Min_size_t (const size_t First, const size_t Second)
+{
+    if (First > Second)
+    {
+        return Second;
+    }
+
+    else
+    {
+        return First;
+    }
+}
+
 int Strcmp_K (const char* const Str_1, const char* const Str_2)
 {
+    assert (Str_1 != NULL);
+    assert (Str_2 != NULL);
+
     const size_t Len_Str_1 = Strlen_K (Str_1);
 
     for (size_t i = 0; i < Len_Str_1 + 1; i++)
@@ -95,9 +107,15 @@ ssize_t Getline_K (char** const Buffer_Str, size_t* const Len_Buffer, FILE* cons
 
     const size_t Len_New_Empty_Buffer = 100;
 
-    if (*Buffer_Str == NULL)
+    if (*Buffer_Str == NULL || Len_Buffer == 0)
     {
         *Buffer_Str = (char*) calloc (Len_New_Empty_Buffer, sizeof (char));
+
+        if (*Buffer_Str == NULL)
+        {
+            return -1;
+        }
+
         *Len_Buffer = Len_New_Empty_Buffer;
     }
 
@@ -105,12 +123,13 @@ ssize_t Getline_K (char** const Buffer_Str, size_t* const Len_Buffer, FILE* cons
 
     while (1)
     {
-        char Symbol = fgetc(Str);
+        const int Symbol = fgetc(Str);
 
         if (Symbol == '\n')
         {
             (*Buffer_Str)[i] = Symbol;
             (*Buffer_Str)[i+1] = '\0';
+
             return i;
         }
 
@@ -134,6 +153,12 @@ ssize_t Getline_K (char** const Buffer_Str, size_t* const Len_Buffer, FILE* cons
         if (i == (*Len_Buffer) - 1)
         {
             *Buffer_Str = (char*) realloc (*Buffer_Str, (*Len_Buffer) * 2);
+
+            if (*Buffer_Str == NULL)
+            {
+                return -1;
+            }
+
             *Len_Buffer = (*Len_Buffer) * 2;
         }
     }
@@ -150,11 +175,9 @@ int Atoi_K (const char* const Str)
 {
     assert (Str != NULL);
 
-    size_t Len_Str = Strlen_K (Str);
-    int i = 0;
+    size_t i = 0;
     int Sign = 1;
     int Sum = 0;
-    int Extreme_Int = 2147483647;
 
     while (Str[i] == ' ')
     {
@@ -174,36 +197,12 @@ int Atoi_K (const char* const Str)
 
     while (Str[i] >= '0' && Str[i] <= '9')
     {
-        printf ("Number %d\n", Str[i]- 48);
-        printf ("Sum was %d\n", Sum);
-        if (((Sum * 10) + int ((Str[i]) - 48)) < Extreme_Int)
-        {
-            Sum = (Sum * 10) + int ((Str[i]) - 48);
-        }
+        Sum = (Sum * 10) + int ((Str[i]) - '0');
 
-        else
-        {
-            return Extreme_Int*Sign ;
-
-        }
-
-        printf ("Sum now %d\n", Sum);
-//         if (Sum >= 214748364)
-//         {
-//             if (Sum < 214748365 && 0 <= ((Str[i+1]) - 48) && ((Str[i+1]) - 48) < 7)
-//             {
-//                 continue;
-//             }
-//
-//             else
-//             {
-//                 return Extreme_Int*Sign ;
-//             }
-//         }
         i++;
     }
 
-    return Sum*Sign;
+    return Sum * Sign;
 }
 
 char* Fgets_K (char* const Changeable_Str, const size_t Max_Quantity, FILE* const Str)
@@ -220,7 +219,7 @@ char* Fgets_K (char* const Changeable_Str, const size_t Max_Quantity, FILE* cons
 
     while (i < Max_Quantity - 1)
     {
-        char Symbol = fgetc(Str);
+        int Symbol = fgetc(Str);
 
         if (Symbol == '\n')
         {
@@ -258,14 +257,14 @@ char* Strncat_K (char* const Changeable_Str, const char* const Str, const size_t
     assert (Str != NULL);
 
     const size_t Len_Changeable_Str = Strlen_K (Changeable_Str);
-    const size_t a = fmin (Max_Quantity, Strlen_K (Str));
+    const size_t Smaller = Min_size_t (Max_Quantity, Strlen_K (Str));
 
-    for (size_t i = 0; i < a; i++)
+    for (size_t i = 0; i < Smaller; i++)
     {
         Changeable_Str[Len_Changeable_Str + i] = Str[i];
     }
 
-    Changeable_Str[Len_Changeable_Str + a + 1] = '\0';
+    Changeable_Str[Len_Changeable_Str + Smaller + 1] = '\0';
 
     return Changeable_Str;
 }
@@ -292,9 +291,9 @@ char* Strncpy_K (char* const Changeable_Str, const char* const Str, const size_t
     assert (Str != NULL);
 
     const size_t Len_Str = (Strlen_K (Str));
-    const size_t a = fmin (Max_Quantity, Len_Str);
+    const size_t Smaller = Min_size_t (Max_Quantity, Len_Str);
 
-    for (size_t i = 0; i < a; i++)
+    for (size_t i = 0; i < Smaller; i++)
     {
         Changeable_Str[i] = Str[i];
     }
