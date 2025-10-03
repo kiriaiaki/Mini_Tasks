@@ -27,7 +27,7 @@ int main ()
     char Str_Numeric[100] = "291474836411abs";
     char Original_Str[40] = "abs rty 123";
 
-    Puts_K (Str);
+    kiruxa::Puts_K (Str);
 
     printf ("strchr: %p\n", Strchr_K (Str, 'v'));
 
